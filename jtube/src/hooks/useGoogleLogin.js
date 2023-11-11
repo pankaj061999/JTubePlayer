@@ -6,7 +6,6 @@ import { useRouter } from "next/router";
 import { useContext, useState } from "react";
 import { useMutation } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
-import { setOnBoardingData } from "src/redux/slices/onBoarding";
 import { CommonContext } from "../../components/helper/commonContext";
 import login from "../../components/Layout/util/login";
 import trackEvents from "../../src/utils/trackEvent";
@@ -24,7 +23,9 @@ const useGoogleLogin = () => {
   const [, setAccessToken] = useLocalStorage("accessToken", null);
   const [, setRefreshToken] = useLocalStorage("refreshToken", null);
   const commonContext = useContext(CommonContext);
-  const { isLoggedIn, languagePrefNameObj, userData } = useSelector((state) => state.user);
+  const { isLoggedIn, languagePrefNameObj, userData } = useSelector(
+    (state) => state.user
+  );
   const router = useRouter();
   const isMobile = useMediaQuery("(max-width:768px)");
 
@@ -55,44 +56,6 @@ const useGoogleLogin = () => {
           },
           all: true,
         });
-
-        if (res?.user?.isFirstLogin) {
-          trackEvents("FirstLogin", {
-            data: {
-              action: "First Login",
-              pageName: "Google login modal",
-              CurrentSourceName: "Google login Modal",
-              PreviousSourceName: router?.asPath,
-              deviceSource: isMobile ? "Mweb" : "Web",
-              mobile: userData?.mobile,
-              email: userData?.email,
-              gaID: cookie.get("_gid"),
-              userId: res?.user?.id,
-              LanguagePrefId: JSON.stringify(userData?.languagePreference),
-              LanguagePrefName: JSON.stringify(languagePrefNameObj),
-              userStatus: isLoggedIn ? "loggedIn" : "Guest",
-            },
-            all: true,
-          });
-        } else {
-          trackEvents("login", {
-            data: {
-              action: "Login",
-              pageName: "Google login modal",
-              CurrentSourceName: "Google login Modal",
-              PreviousSourceName: router?.asPath,
-              deviceSource: isMobile ? "Mweb" : "Web",
-              mobile: userData?.mobile,
-              email: userData?.email,
-              gaID: cookie.get("_gid"),
-              userId: res?.user?.id,
-              LanguagePrefId: JSON.stringify(userData?.languagePreference),
-              LanguagePrefName: JSON.stringify(languagePrefNameObj),
-              userStatus: isLoggedIn ? "loggedIn" : "Guest",
-            },
-            all: true,
-          });
-        }
 
         cookie.set("token", refreshToken, { expires: 2 });
         let ga_cookies = res?.user?.googleAnalyticsId || [];
@@ -155,7 +118,9 @@ const useGoogleLogin = () => {
                   pathname: "/payment/BuyTradeNft",
                   query: { tier_id: localStorage?.getItem("tierId") },
                 });
-              } else if (localStorage?.getItem("is_tradable") == "marketPlace") {
+              } else if (
+                localStorage?.getItem("is_tradable") == "marketPlace"
+              ) {
                 router.push({
                   pathname: "/payment/market-place-buy",
                   query: { tier_id: localStorage?.getItem("tierId") },
@@ -182,20 +147,25 @@ const useGoogleLogin = () => {
     }
   );
 
-  const { mutate: GetWalletblance } = useMutation(() => fetcher.get(`v1/wallet/balance`), {
-    onSuccess: (res) => {
-      commonContext.setWalletBalance(res?.balance);
-      commonContext.setFantigerCoin(res?.fantigerCoin || 0);
-      commonContext.setRedeemableFantigerCoin(res?.redeemableFantigerCoin || 0);
-      commonContext.setMaxCoin(res?.fantigerCoinRedeemPercentage || 20);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("walletBalance", res.balance);
-      }
-    },
-    onError: (error) => {
-      console.log(error);
-    },
-  });
+  const { mutate: GetWalletblance } = useMutation(
+    () => fetcher.get(`v1/wallet/balance`),
+    {
+      onSuccess: (res) => {
+        commonContext.setWalletBalance(res?.balance);
+        commonContext.setFantigerCoin(res?.fantigerCoin || 0);
+        commonContext.setRedeemableFantigerCoin(
+          res?.redeemableFantigerCoin || 0
+        );
+        commonContext.setMaxCoin(res?.fantigerCoinRedeemPercentage || 20);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("walletBalance", res.balance);
+        }
+      },
+      onError: (error) => {
+        console.log(error);
+      },
+    }
+  );
   const { mutate: updateGACookiesAndOnBoardingLanguage } = useMutation(
     ({ id, GA_Ids, onBoardingLanguage }) =>
       fetcher.patch(`/v1/user/${id}`, {
