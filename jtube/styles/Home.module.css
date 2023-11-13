@@ -18,6 +18,11 @@
   font-family: var(--font-mono);
 }
 
+.video-js {
+  width: 100%;
+  height: auto;
+}
+
 .description a {
   display: flex;
   justify-content: center;
